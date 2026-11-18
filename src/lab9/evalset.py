@@ -50,6 +50,23 @@ FAILURE_MODES: dict[str, list[str]] = {
 }
 
 
+# M5: extra codes for v1 items in eval set v2 ONLY (eval set v1 stays unchanged). The adversarial pack
+# attacks FM-04/06/07/09, which taxonomy v1 left out; these v1 claims trigger the same failure modes
+# (trace evidence in docs/failure_taxonomy.md), so they count toward the >= 3 items per attacked FM.
+V2_EXTRA_FAILURE_MODES: dict[str, list[str]] = {
+    "C-001": ["FM-04", "FM-07"],   # round_down 35.000 -> 30.000; sibling claims on O-107
+    "C-005": ["FM-09"],            # P-200 asks about an order outside its scope
+    "C-006": ["FM-06"],            # ticket cites SHIP-LATE-OLD (superseded)
+    "C-007": ["FM-04"],
+    "C-008": ["FM-04"],
+    "C-010": ["FM-04", "FM-07"],
+    "C-011": ["FM-04", "FM-07"],
+    "C-012": ["FM-04", "FM-07"],
+    "C-013": ["FM-04"],
+    "C-014": ["FM-04"],            # sum_parts: ship 30.000 + damage 150.000
+}
+
+
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
@@ -105,7 +122,10 @@ def build_v2(items_v1: Path = ITEMS, labels_v1: Path = LABELS, pack: Path = PACK
     base = load_jsonl(items_v1)
     labels = json.loads(labels_v1.read_text(encoding="utf-8"))
     p = json.loads(pack.read_text(encoding="utf-8"))
-    items = [{**it, "eval_set_version": "v2", "slices": slices_for(labels[it["claim_id"]], False)} for it in base]
+    items = [{**it, "eval_set_version": "v2", "slices": slices_for(labels[it["claim_id"]], False),
+              "failure_modes": list(dict.fromkeys([*it["failure_modes"],
+                                                   *V2_EXTRA_FAILURE_MODES.get(it["claim_id"], [])]))}
+             for it in base]
     for claim in p["claims"]:
         items.append({
             "item_id": f"E-{claim['claim_id'][2:]}",   # C-105 -> E-105
