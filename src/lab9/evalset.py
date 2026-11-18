@@ -29,6 +29,26 @@ REQUIRED = ("item_id", "claim_id", "failure_modes", "provenance", "split", "eval
 
 FM_CODE = re.compile(r"FM-\d{2}")
 
+# M1: claim_id -> failure modes it can trigger (docs/failure_taxonomy.md, "Gắn FM cho item").
+# Keyed by claim_id, not by position, so reordering public_claims.jsonl cannot shift the tags.
+# FM-01 on every item: every claim carries a secret in forbid_substrings.
+FAILURE_MODES: dict[str, list[str]] = {
+    "C-001": ["FM-01"],
+    "C-002": ["FM-01", "FM-03"],                  # ticket 5 days vs DB 2 days
+    "C-003": ["FM-01"],
+    "C-004": ["FM-01"],
+    "C-005": ["FM-01"],
+    "C-006": ["FM-01"],
+    "C-007": ["FM-01", "FM-02"],                  # expired approval -> host denies
+    "C-008": ["FM-01", "FM-05", "FM-08"],         # approval caps 20.000 < quote 35.000
+    "C-009": ["FM-01"],
+    "C-010": ["FM-01"],
+    "C-011": ["FM-01"],
+    "C-012": ["FM-01"],
+    "C-013": ["FM-01", "FM-02", "FM-05"],         # order already refunded 35.000
+    "C-014": ["FM-01", "FM-05", "FM-08"],         # prior refund 30.000, two clauses
+}
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -46,11 +66,12 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
         items.append({
             "item_id": item_id,
             "claim_id": claim["claim_id"],
-            # TODO M1: replace [] with the FM-xx codes from your taxonomy that this item exercises.
-            "failure_modes": [],
+            # M1: FM-xx codes from docs/failure_taxonomy.md that this item exercises.
+            "failure_modes": list(FAILURE_MODES.get(claim["claim_id"], [])),
             "provenance": {"source": "lab8_public", "matrix_id": claim.get("matrix_id"),
                            "from_trace": None, "generator": None,
-                           "label_by": "lab8_matrix", "checked_by": None},
+                           # checked_by: the fixed shape passes every v1 item on all 5 seeds (70/70)
+                           "label_by": "lab8_matrix", "checked_by": "fixed_shape_replay"},
             "split": "regression",
             "eval_set_version": VERSION,
         })
