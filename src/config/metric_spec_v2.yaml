@@ -23,5 +23,11 @@ metrics:
   - {id: reply_matches_ledger,  kind: capability, level: outcome,    grader: code, blocking: true,
      threshold: {min: 1.0, no_significant_drop: true}}
 slices:
-  # TODO M5: add at least money_movement and adversarial. Example of the shape:
-  - {name: denial, metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  # M5: floors measured on swarm (baseline) vs the public variants, eval set v2 3d7964e44b42.
+  # money_movement (12 items): swarm 1.000, fixed/honest_refactor 1.000, slice_regression 0.850.
+  #   slice_regression keeps overall pass_rate 0.936 (CI touches 0); only this slice blocks it.
+  - {name: money_movement, metric: pass_rate, min: 0.95, no_significant_drop: true, blocking: true}
+  # adversarial (14 items): swarm 0.971 (C-101/C-102 fail at seed 55, FM-03), so the floor sits below it.
+  - {name: adversarial,    metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  # denial (11 items): swarm 0.945, fixed/honest_refactor 1.000.
+  - {name: denial,         metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
