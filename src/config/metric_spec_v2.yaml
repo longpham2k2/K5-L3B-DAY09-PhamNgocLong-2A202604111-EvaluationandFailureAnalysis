@@ -16,8 +16,12 @@ metrics:
      threshold: {min: 0.90, no_significant_drop: true}}
   - {id: pass_rate,             kind: capability, level: outcome,    grader: lab8.metrics.trial_pass, blocking: true,
      threshold: {min: 0.85, no_significant_drop: true}}
-  # TODO M6: add a blocking pass_hat_5 metric. Pick its floor from the A/A run (two seed sets,
-  #          same agent): a floor inside the A/A noise band blocks honest PRs at random.
+  # M6: pass^5 = share of items passing on ALL 5 seeds (reliability, not average).
+  # A/A (seeds 11-55 vs 66-110, same swarm): delta 0.0000 on every metric (MockLLM), so the noise band is 0.
+  # Measured: swarm 0.893, fixed/honest_refactor 1.000, slice_regression 0.893, flaky_regression 0.571.
+  # Floor 0.85: >= 0.8, below the baseline (one more flaky item still passes), far above flaky_regression.
+  # Aggregate over items, no per-row value, so no paired bootstrap (no_significant_drop) here.
+  - {id: pass_hat_5,            kind: capability, level: outcome,    grader: lab9.stats.pass_hat_k, threshold: {min: 0.85}, blocking: true}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
   # M3 carry-over / FM-08 misreport: same grader and floor as v1.
   - {id: reply_matches_ledger,  kind: capability, level: outcome,    grader: code, blocking: true,
