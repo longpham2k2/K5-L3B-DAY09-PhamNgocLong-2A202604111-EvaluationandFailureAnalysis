@@ -97,4 +97,4 @@ Với `seeded_regression`, chỉ CI của `pass_rate` nằm hẳn dưới 0; `re
   - 28 item và slice 11–14 item cho CI rất rộng (ví dụ `money_movement` của `slice_regression`: [−0.300, +0.000]), nên slice gate dựa vào sàn nhiều hơn vào bootstrap.
 - **Giới hạn khác:**
   - FM-09 bị tấn công (3 item) nhưng không shape nào làm lộ lỗi: guard phạm vi nằm ở investigator/host, nên eval set chỉ chứng minh guard đang giữ (xem `docs/failure_taxonomy.md`).
-  - `integrity_check` (M7) chưa làm: gate v2 hiện tin vào report đầu vào. Report bị "làm đẹp" (bỏ dòng fail, chọn seed, metric NaN) chưa bị chặn.
+  - `integrity_check` (M7): gate từ chối report không đáng tin trước khi so ngưỡng: metric NaN/inf, thiếu hoặc trùng dòng (item, seed), tập (item, seed) hoặc seed khác baseline, evaluator failure hoặc giá trị None, metric báo cáo khác với giá trị tính lại từ rows, nhãn slice khác baseline, và ratchet với `--base-spec`. `python -m lab9.traps`: chặn 4/4 trap công khai. Chưa bắt được: report làm giả nhất quán (sửa cả rows lẫn metrics, ví dụ đổi `pass_rate` False → True trên từng dòng), vì gate không chạy lại agent; chỉ CI tự chạy eval (như job `eval-gate`) mới chống được kiểu đó.
