@@ -35,7 +35,7 @@ Bối cảnh: ticket của khách ghi "Đơn giao trễ 5 ngày, hoàn phí ship
 
 | Trường | Nội dung |
 |---|---|
-| Trial | `swarm C-002@55`, trial fail duy nhất của baseline (`pass_rate` 0.9857 = 69/70). Run ID: `run_id` trong `reports/baseline_v1.json`, dạng `E-swarm-<YYYYMMDD>-f5fa` (eval set `f5fad985834d`) |
+| Trial | `swarm C-002@55`, trial fail duy nhất của baseline (`pass_rate` 0.9857 = 69/70). Run ID: `E-swarm-20261118-f5fa` (`reports/baseline_v1.json`, eval set `f5fad985834d`) |
 | Triệu chứng | Grader Lab 8 FAIL: `status resolved != denied`. Ledger ghi 1 dòng hoàn **20.000đ** cho C-002, nhãn là 0đ và 0 dòng. Shape `swarm` không có event `reply`; trên `seeded_regression C-002@11` cùng lỗi, reply nói "Dạ, LogiX đã hoàn 20.000đ cho đơn O-202." và khớp ledger, tức reply đúng với ledger nhưng cả hai đều sai so với nhãn |
 | Bước sai đầu tiên | Event 3 `model_override {"delay_days": 5}` |
 | Vì sao là bước *đầu tiên* | Event 1 `handoff` đúng: phạm vi `owner_order_only`, chỉ cho phép tool đọc. Event 2 `investigator` đọc đúng từ DB: `{"order_id": "O-202", "delay_days": 2, "shipping_fee_vnd": 20000, ...}`. Event 4 `quote {"amount_vnd": 20000, "clause_ids": ["SHIP-LATE-03"]}` tính đúng **với** delay = 5, nên chỉ là hệ quả của event 3; dòng ledger và status `resolved` cũng là hệ quả |
